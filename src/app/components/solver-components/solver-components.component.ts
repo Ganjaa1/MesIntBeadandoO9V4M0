@@ -25,6 +25,7 @@ export class SolverComponentsComponent implements OnInit {
       console.log('ez lett: ', this.localSearch(1000000, routes));
 
     })
+    this.getBestBetweenRiders(10)
   }
 
   generateCitiesCoordinates(clientNumber: number) {
@@ -105,8 +106,11 @@ export class SolverComponentsComponent implements OnInit {
     riderPaths.forEach(route => {
       let bestRowRoutes = this.localSearch(1000000, route);
       bestRowRoutes.forEach(bestRow => {
-
+        let rowIndex: number = Math.floor(Math.random() * ((this.riders.length - 1) - 0) + 0);
+        let columnIndex: number = Math.floor(Math.random() * ((route.length - 1) - 0) + 0);
+        console.log(rowIndex, ' ', columnIndex, ' ', this.riders[rowIndex].destinations[columnIndex])
       })
+      //amit kivesz azt cserélgetni, hogy lenne jobb mint volt, felülírni, de úgy hogy azt még később tudjam használni
       // route.forEach(routeItem => {
 
       // })
@@ -119,48 +123,6 @@ export class SolverComponentsComponent implements OnInit {
 
     // }
   }
-
-  // localSearch(iterations: number) {
-  //   let usedCities: number[] = [];
-  //   let tsp_dict = this.transformTSP(this.cities);
-  //   let riderPaths = this.riders.map(item => item.destinations.map(dest => dest));
-  //   for (let i = 0; i < riderPaths.length; i++) {
-  //     let currentBest = this.objectFunction(tsp_dict, riderPaths[i]);
-  //     let currentBestRoutes: number[] = riderPaths[i];
-  //     console.log("startedBest: ", currentBest, 'indexes: ', currentBestRoutes)
-  //     for (let j = 0; j < iterations; j++) {
-  //       let randomLength: number = Math.floor(Math.random() * ((this.cities.length - 1) - currentBestRoutes.length) + currentBestRoutes.length)
-  //       let currentPathShuffledRoutes: number[];
-  //       randomLength = Math.floor(Math.random() * ((this.cities.length - 1) - currentBestRoutes.length) + currentBestRoutes.length);
-  //       currentPathShuffledRoutes =
-  //         [...new Set(
-  //           [...new Array(randomLength)].map(() =>
-  //             Math.floor(Math.random() * (this.cities.length - 1 - 0) + 0)
-  //           )
-  //         ),
-  //         ];
-  //       let currentPathCalc = this.objectFunction(tsp_dict, currentPathShuffledRoutes);
-
-  //       if (currentPathCalc < currentBest && currentPathCalc
-  //         && currentPathShuffledRoutes.length != 0 && !usedCities.some(city => currentPathShuffledRoutes.includes(city))) {
-  //         currentBestRoutes = currentPathShuffledRoutes;
-  //         currentBest = currentPathCalc;
-  //       }
-  //     }
-  //     currentBestRoutes.forEach(route => usedCities.push(route))
-  //     console.log("finishedBest: ", currentBest, 'indexes: ', currentBestRoutes, '\n')
-  //     console.log("fasz")
-
-  //   }
-  //   console.log(usedCities)
-  // }
-  //itt úgy vizsgálódni, hogy ez a loop nézi hogy az elsőhöz rendelve hogy a legjobb, majd megy a kövi sorra, amiken már átment elmenti
-  // for (let index = 0; index < dataIndexes.length; index++) {
-  //   console.log(`Vehicle[${index}] route:   {[...dataIndexes[index]]} \n and it's cost: ${this.objectFunction(this.transformTSP(this.cities),dataIndexes[index])}`);
-  // } 
-  // let objectF = this.objectFunction(tsp_dict,s)
-  // let sBest = s;
-  //let fBest =
 
   getDistance(city1: City, city2: City) {
     return Math.pow((Math.pow((city2.x - city1.x), 2) + Math.pow((city1.y - city2.y), 2)), 0.5);
