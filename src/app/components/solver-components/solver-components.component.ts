@@ -15,7 +15,7 @@ export class SolverComponentsComponent implements OnInit {
 
   citiesNumber: number = 10 | 20 | 50 | 100 | 200 | 500;
   vehicleNumber: number = 1 | 2 | 4 | 5 | 10 | 20;
-  depot: City = { x: 5, y: 5 };
+  depot: City = { x: 50, y: 50 };
   usedCities: number[] = [];
   tspDictionary: any[] = [];
 
@@ -37,7 +37,6 @@ export class SolverComponentsComponent implements OnInit {
     }
   }
 
-
   constructor() { }
 
   //selectboxra subscribe -> megadni a numbereket 2 db van!
@@ -47,16 +46,14 @@ export class SolverComponentsComponent implements OnInit {
     console.log('cities:', this.cities)
     this.shuffleCitiesForVehicles(2);
     console.log('vehicles', this.vehicles);
-    this.tspDictionary = this.transformTSP(this.cities);
     this.searchRoutes();
-    this.getClosestCityToDepo();
   }
 
   generateCities(clientNumber: number) {
     let i = 0;
     while (i < clientNumber) {
-      let x = Math.floor(Math.random() * 10);
-      let y = Math.floor(Math.random() * 10);
+      let x = Math.floor(Math.random() * 100);
+      let y = Math.floor(Math.random() * 100);
       let city = { x, y };
       if (!this.cities.find(c => c === city) && city !== this.depot) {
         this.cities.push({ x, y })
@@ -100,97 +97,115 @@ export class SolverComponentsComponent implements OnInit {
     this.vehicles = Object.entries(tmpVehicles).map(groupedRoutes => ({ 'routeNumber': +groupedRoutes[0], 'destinations': [...[groupedRoutes[1]]][0] as unknown as number[] }));
   }
 
-  // objectFunction(s: number[]) {
-  //   let cities = [...this.cities];
-  //   let dist = 0;
-  //   let prev = 0;
-  //   //dist += this.getDistance(this.depot, cities[s[0]])
-  //   for (let i = 0; i < s.length; i++) {
-  //     dist += this.getDistance(cities[prev], cities[s[i]])
-  //     prev = i;
-  //   }
-  //   //dist += this.getDistance(this.depot, cities[s[s.length - 1]])
-
-  //   return dist;
-
-  // }
-
-  transformTSP(tsp: City[]) {
-    let tspDict: number[][] = [];
-    tsp.forEach((_city, i) => {
-      tspDict[i] = [];
-      tsp.forEach((_city, j) => tspDict[i][j] = this.getDistance(tsp[i], tsp[j]));
-    })
-    return tspDict;
-  }
 
   objectFunction(s: any[]) {
     let dist = 0;
     let prev = s[0];
     for (let i = 0; i < s.length; i++) {
-      dist += this.tspDictionary[prev][i];
+      dist += this.getDistance(this.cities[prev], this.cities[i]);
       prev = i;
     }
-    dist += this.tspDictionary[s.slice(-1)[0]][0];
+    dist += this.getDistance(this.cities[this.cities.length - 1], this.cities[0]);
     return dist;
 
   }
 
   neighborhoodSearch(iterations: number, routes: number[]) {
-    let bestSearch = this.objectFunction([...routes]);
+    let bestCalc = this.objectFunction(routes);
     let bestRoutes = [...routes];
+    let sBase = bestRoutes
+    let sBaseCalc = this.objectFunction(sBase)
     for (let i = 0; i < iterations; i++) {
-      let bestNeighborRoutes = [...bestRoutes];
-      let bestNeighborCalc = this.objectFunction(routes);
+      let bestNeighborRoutes = sBase;
+      let bestNeighborCalc = sBaseCalc;
       for (let j = 0; j < 100; j++) {
+        let neigbour = [...sBase];
         let a: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
         let b: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
-        let tmp = bestNeighborRoutes[a];
-        bestNeighborRoutes[a] = bestNeighborRoutes[b];
-        bestNeighborRoutes[b] = tmp;
-        let currenRoutesSearchCalc = this.objectFunction(bestNeighborRoutes);
+        let tmp = +neigbour[a];
+        neigbour[a] = neigbour[b];
+        neigbour[b] = tmp;
+        let neighbourCalc = this.objectFunction(neigbour);
 
-        if (currenRoutesSearchCalc < bestNeighborCalc && a != b) {
-          bestNeighborCalc = currenRoutesSearchCalc;
-          bestNeighborRoutes = bestNeighborRoutes;
+        if (neighbourCalc < bestNeighborCalc && a != b) {
+          bestNeighborCalc = neighbourCalc;
+          bestNeighborRoutes = neigbour;
         }
       }
-      if (bestNeighborCalc < bestSearch) {
-        bestRoutes = bestNeighborRoutes;
-        bestSearch = bestNeighborCalc;
+      sBase = bestNeighborRoutes;
+      sBaseCalc = bestNeighborCalc;
+      if (sBaseCalc < bestCalc) {
+        bestRoutes = sBase;
+        bestCalc = sBaseCalc;
       }
     }
     return bestRoutes;
   }
+  // bestRouteSearch(iterations: number, routes: number[]) {
+  //   let bestCalc = this.objectFunction(routes);
+  //   let bestRoutes = routes;
+  //   let sBase = [...bestRoutes]
+  //   let sBaseCalc = this.objectFunction(sBase)
+  //   for (let i = 0; i < iterations; i++) {
+  //     let bestNeighborRoutes = [...sBase];
+  //     let bestNeighborCalc = sBaseCalc;
+  //     for (let j = 0; j < 100; j++) {
+  //       let neigbour = [...sBase];
+  //       let a: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
+  //       let citiesIndex: number = Math.floor(Math.random() * ((this.cities.length - 1)));
+  //       let tmp = +neigbour[a];
+  //       neigbour[a] = citiesIndex;
+  //       neigbour[citiesIndex] = tmp;
+  //       this.neighborhoodSearch(1000, neigbour)
+  //       let neighbourCalc = this.objectFunction(neigbour);
+
+  //       if (neighbourCalc < bestNeighborCalc && a != citiesIndex) {
+  //         bestNeighborCalc = neighbourCalc;
+  //         bestNeighborRoutes = neigbour;
+  //       }
+  //     }
+  //     sBase = bestNeighborRoutes;
+  //     sBaseCalc = bestNeighborCalc;
+  //     if (sBaseCalc < bestCalc) {
+  //       bestRoutes = sBase;
+  //       bestCalc = sBaseCalc;
+  //     }
+  //   }
+  //   return bestRoutes;
+  // }
 
   bestRouteSearch(iterations: number, routes: number[]) {
-    let bestSearch = this.objectFunction([...routes]);
+    let bestCalc = this.objectFunction(routes);
     let bestRoutes = [...routes];
+    let sBase = bestRoutes
+    let sBaseCalc = this.objectFunction(sBase)
     let tmpUsedCities: number[] = [...this.usedCities, ...bestRoutes];
+
     for (let i = 0; i < iterations; i++) {
-      let bestCityDistance = 999999;
-      let bestNeighborRoutes = [...bestRoutes];
-      let bestNeighborCalc = this.objectFunction(routes);
+      let bestNeighborRoutes = sBase;
+      let bestNeighborCalc = sBaseCalc;
+
       for (let j = 0; j < 100; j++) {
         let routeIndex: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
         let randomCityIndex = Math.floor(Math.random() * ((this.cities.length - 1)));
-        let currentCityDistance = this.getDistance(this.cities[bestNeighborRoutes[routeIndex]], this.cities[randomCityIndex])
-        if (!tmpUsedCities.includes(randomCityIndex) && !bestNeighborRoutes.includes(randomCityIndex) && currentCityDistance < bestCityDistance) {
-          bestCityDistance = currentCityDistance;
-          //let tmp = bestNeighborRoutes[routeIndex];
-          bestNeighborRoutes[routeIndex] = randomCityIndex;
-          let currenRoutesSearchCalc = this.objectFunction(bestNeighborRoutes);
+
+        if (!this.usedCities.includes(randomCityIndex) && !bestNeighborRoutes.includes(randomCityIndex)) {
+          let insideRoutes = [...sBase];
+          insideRoutes[routeIndex] = randomCityIndex;
+          let currenRoutesSearchCalc = this.objectFunction(insideRoutes);
 
           if (currenRoutesSearchCalc < bestNeighborCalc && !tmpUsedCities.includes(randomCityIndex)) {
             tmpUsedCities[tmpUsedCities.length - 1] = randomCityIndex;
             bestNeighborCalc = currenRoutesSearchCalc;
-            bestRoutes = bestNeighborRoutes;
+            bestNeighborRoutes = insideRoutes;
           }
         }
       }
-      if (bestNeighborCalc < bestSearch) {
+      sBase = bestNeighborRoutes;
+      sBaseCalc = bestNeighborCalc;
+      if (sBaseCalc < bestCalc) {
         bestRoutes = bestNeighborRoutes;
-        bestSearch = bestNeighborCalc;
+        bestCalc = bestNeighborCalc;
       }
     }
     bestRoutes.forEach(city => !this.usedCities.includes(city) ? this.usedCities.push(city) : null)
@@ -239,10 +254,15 @@ export class SolverComponentsComponent implements OnInit {
       showLine: true
     })
     console.table(this.cities)
-    console.log('usefd:', this.usedCities)
+    console.log('usedcities:', this.usedCities)
 
   }
 
+  getDistance(city1: City, city2: City) {
+    return Math.abs(city2.x - city1.x) + Math.abs(city1.y - city2.y);
+  }
+
+}
 
 
 
@@ -253,7 +273,29 @@ export class SolverComponentsComponent implements OnInit {
 
 
 
+  // objectFunction(s: number[]) {
+  //   let cities = [...this.cities];
+  //   let dist = 0;
+  //   let prev = 0;
+  //   //dist += this.getDistance(this.depot, cities[s[0]])
+  //   for (let i = 0; i < s.length; i++) {
+  //     dist += this.getDistance(cities[prev], cities[s[i]])
+  //     prev = i;
+  //   }
+  //   //dist += this.getDistance(this.depot, cities[s[s.length - 1]])
 
+  //   return dist;
+
+  // }
+
+  // transformTSP(tsp: City[]) {
+  //   let tspDict: number[][] = [];
+  //   tsp.forEach((_city, i) => {
+  //     tspDict[i] = [];
+  //     tsp.forEach((_city, j) => tspDict[i][j] = this.getDistance(tsp[i], tsp[j]));
+  //   })
+  //   return tspDict;
+  // }
 
 
 
@@ -348,12 +390,7 @@ export class SolverComponentsComponent implements OnInit {
 
   // }
 
-  getDistance(city1: City, city2: City) {
-    return Math.abs(city2.x - city1.x) + Math.abs(city1.y - city2.y);
-  }
-
-}
-      // let tmpCurrentArray = [...localBestRoutes];
+    // let tmpCurrentArray = [...localBestRoutes];
       // localBestRoutes.forEach((_currentItem,currentItemIndex) => {
       //   riderRoutes.filter(rider => rider != route).forEach(notCurrentArray =>{
       //     //console.log(tmpCurrentArray, notCurrentArray)
