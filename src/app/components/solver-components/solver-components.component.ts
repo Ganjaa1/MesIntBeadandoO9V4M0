@@ -99,14 +99,14 @@ export class SolverComponentsComponent implements OnInit {
   }
 
 
-  objectFunction(s: any[]) {
-    let dist = 0;
-    let prev = s[0];
-    for (let i = 0; i < s.length; i++) {
-      dist += this.getDistance(this.cities[prev], this.cities[i]);
+  objectFunction(routes: any[]) {
+    let dist:number = 0;
+    let prev = 0;
+    for (let i = 0; i < routes.length; i++) {
+      dist += +this.getDistance(this.cities[routes[prev]], this.cities[routes[i]]);
       prev = i;
     }
-    dist += this.getDistance(this.cities[this.cities.length - 1], this.cities[0]);
+    dist += +this.getDistance(this.cities[routes[routes.length - 1]], this.cities[routes[0]]);
     return dist;
 
   }
@@ -114,11 +114,14 @@ export class SolverComponentsComponent implements OnInit {
   neighborhoodSearch(iterations: number, routes: number[]) {
     let bestCalc = this.objectFunction(routes);
     let bestRoutes = [...routes];
-    let sBase = bestRoutes
+
+    let sBase = [...bestRoutes]
     let sBaseCalc = this.objectFunction(sBase)
+
     for (let i = 0; i < iterations; i++) {
       let bestNeighborRoutes = [...sBase];
       let bestNeighborCalc = sBaseCalc;
+
       for (let j = 0; j < 100; j++) {
         let neighbor = [...sBase];
         let a: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
@@ -130,13 +133,14 @@ export class SolverComponentsComponent implements OnInit {
 
         if (neighborCalc < bestNeighborCalc && a != b) {
           bestNeighborCalc = neighborCalc;
-          bestNeighborRoutes = neighbor;
+          bestNeighborRoutes = [...neighbor];
         }
       }
-      sBase = bestNeighborRoutes;
+      sBase = [...bestNeighborRoutes];
       sBaseCalc = bestNeighborCalc;
+
       if (sBaseCalc < bestCalc) {
-        bestRoutes = sBase;
+        bestRoutes = [...sBase];
         bestCalc = sBaseCalc;
       }
     }
@@ -146,7 +150,7 @@ export class SolverComponentsComponent implements OnInit {
   bestRouteSearch(iterations: number, routes: number[]) {
     let bestCalc = this.objectFunction(routes);
     let bestRoutes = [...routes];
-    let sBase = bestRoutes
+    let sBase = [...bestRoutes];
     let sBaseCalc = this.objectFunction(sBase)
     let tmpUsedCities: number[] = [...this.usedCities, ...bestRoutes];
 
@@ -166,28 +170,28 @@ export class SolverComponentsComponent implements OnInit {
           if (currentRoutesSearchCalc < bestNeighborCalc && !tmpUsedCities.includes(randomCityIndex)) {
             tmpUsedCities[tmpUsedCities.length - 1] = randomCityIndex;
             bestNeighborCalc = currentRoutesSearchCalc;
-            bestNeighborRoutes = insideRoutes;
+            bestNeighborRoutes = [...insideRoutes];
           }
         }
       }
-      sBase = bestNeighborRoutes;
+      sBase = [...bestNeighborRoutes];
       sBaseCalc = bestNeighborCalc;
       if (sBaseCalc < bestCalc) {
-        bestRoutes = bestNeighborRoutes;
+        bestRoutes = [...bestNeighborRoutes];
         bestCalc = bestNeighborCalc;
       }
     }
     bestRoutes.forEach(city => !this.usedCities.includes(city) ? this.usedCities.push(city) : null)
-    return bestRoutes;
+    return [...bestRoutes,bestRoutes[0]];
   }
 
   searchRoutes() {
     let color = ['#000', '#00bcd6', '#d300d6']
     this.vehicles.forEach((vehicle, index) => {
-      console.log('előtte: ', vehicle.destinations, '\nCalc: ', this.objectFunction(vehicle.destinations))
-      //console.log(index, ' ', this.objectFunction(vehicle.destinations));
-      let neighbor = this.neighborhoodSearch(100000, vehicle.destinations)
-      console.log('utána: ', neighbor, '\nCalc: ', this.objectFunction(neighbor));
+      // console.log('előtte: ', vehicle.destinations, '\nCalc: ', this.objectFunction(vehicle.destinations))
+      // console.log(index, ' ', this.objectFunction(vehicle.destinations));
+      // let neighbor = this.neighborhoodSearch(1000000, vehicle.destinations)
+      // console.log('utána: ', neighbor, '\nCalc: ', this.objectFunction(neighbor));
 
       let bestNeighbor = this.bestRouteSearch(100000, vehicle.destinations);
       let bestNeighborSorted = this.neighborhoodSearch(100000, bestNeighbor);
@@ -196,7 +200,7 @@ export class SolverComponentsComponent implements OnInit {
       this.chartData.push({
         label: `Vehicle[${index}]`,
         data: [
-          ...bestNeighborSorted.map(cityNumber => ({ x: this.cities[cityNumber].x, y: this.cities[cityNumber].y }))
+          ...bestNeighbor.map(cityNumber => ({ x: this.cities[cityNumber].x, y: this.cities[cityNumber].y }))
         ],
         borderColor: color[index],
         borderWidth: 1,
