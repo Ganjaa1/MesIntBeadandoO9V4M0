@@ -1,6 +1,6 @@
 import { City } from "./City";
 
-export class Rider{
+export class Vehicle{
     routeNumber!:number;
     destinations!:number[];
 }

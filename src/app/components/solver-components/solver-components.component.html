@@ -1,4 +1,30 @@
-<div>
-    <canvas baseChart [datasets]="chartData" [labels]="chartLabels" [options]="chartOptions" [legend]="chartLegend"
-        [plugins]="chartPlugins" [type]="chartType"></canvas>
-</div>
+<main>
+    <div class="loading-screen-wrapper" *ngIf="isLoading">
+        <div class="loading-screen-icon">
+            Loading...
+        </div>
+    </div>
+    <div class="selectBoxes">
+        <mat-form-field>
+            <span>Vehicle(s) number:</span>
+            <select matNativeControl [(ngModel)]="selectedVehicleNumber">
+                <option *ngFor="let number of vehicleNumbers" [value]="number">
+                    {{number}}
+                </option>
+            </select>
+        </mat-form-field>
+        <mat-form-field>
+            <span>City(s) number:</span>
+            <select matNativeControl [(ngModel)]="selectedCityNumber">
+                <option *ngFor="let number of citiesNumber" [value]="number">
+                    {{number}}
+                </option>
+            </select>
+        </mat-form-field>
+        <button (click)="makeAction()">Apply</button>
+    </div>
+    <div>
+        <canvas baseChart [datasets]="chartData" [labels]="chartLabels" [options]="chartOptions" [legend]="chartLegend"
+            [plugins]="chartPlugins" [type]="chartType"></canvas>
+    </div>
+</main>

@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ChartDataset, ChartOptions, ChartType } from 'chart.js';
 import { City } from 'src/app/models/City';
-import { Rider } from 'src/app/models/Vehicle';
+import { Vehicle } from 'src/app/models/Vehicle';
 
 @Component({
   selector: 'app-solver-components',
@@ -9,15 +9,18 @@ import { Rider } from 'src/app/models/Vehicle';
   styleUrls: ['./solver-components.component.scss']
 })
 export class SolverComponentsComponent implements OnInit {
+  isLoading = false;
 
   cities: City[] = [];
-  vehicles: Rider[] = [];
+  vehicles: Vehicle[] = [];
+  depot: City = { x: 50, y: 50 }; 
 
-  citiesNumber: number = 10 | 20 | 50 | 100 | 200 | 500;
-  vehicleNumber: number = 1 | 2 | 4 | 5 | 10 | 20;
-  depot: City = { x: 50, y: 50 };
+  selectedVehicleNumber!:number;
+  selectedCityNumber!:number;
+  citiesNumber: number[] = [ 10 , 20 , 50 , 100 , 200 , 500];
+  vehicleNumbers: number[] = [ 1 , 2 , 4 , 5 , 10 , 20];
+  
   usedCities: number[] = [];
-  tspDictionary: any[] = [];
 
   chartData: ChartDataset[] = [];
   chartLabels: string[] = [];
@@ -30,9 +33,11 @@ export class SolverComponentsComponent implements OnInit {
         type: 'linear',
         position: 'bottom',
         beginAtZero: true,
+        max:100
       },
       y: {
-        beginAtZero: true
+        beginAtZero: true,
+        max:100
       }
     }
   }
@@ -42,13 +47,33 @@ export class SolverComponentsComponent implements OnInit {
   //selectboxra subscribe -> megadni a numbereket 2 db van!
 
   ngOnInit(): void {
-    //this.generateCities(10);
-    this.cities = [{x:10,y:10},{x:10,y:40},{x:30,y:80},{x:20,y:90},{x:70,y:30},{x:60,y:90},{x:50,y:40},{x:40,y:80},{x:90,y:60},{x:20,y:10}]
-    console.log('cities:', this.cities)
-    this.shuffleCitiesForVehicles(2);
-    console.log('vehicles', this.vehicles);
-    
-    this.searchRoutes();
+    // this.generateCities(10);
+    // //this.cities = [{x:10,y:10},{x:10,y:40},{x:30,y:80},{x:20,y:90},{x:70,y:30},{x:60,y:90},{x:50,y:40},{x:40,y:80},{x:90,y:60},{x:20,y:10}]
+    // this.cities.unshift(this.depot)
+    // console.log('cities:', this.cities)
+    // this.shuffleCitiesForVehicles(1);
+    // console.log('vehicles', this.vehicles);
+    // this.searchRoutes();
+  }
+  
+  makeAction(){
+    if(this.selectedVehicleNumber && this.selectedCityNumber){
+      this.chartData = [];
+      this.cities = [];
+      this.vehicles = [];
+      this.isLoading = true;
+      this.generateCities(this.selectedCityNumber);
+      //this.cities = [{x:10,y:10},{x:10,y:40},{x:30,y:80},{x:20,y:90},{x:70,y:30},{x:60,y:90},{x:50,y:40},{x:40,y:80},{x:90,y:60},{x:20,y:10}]
+      this.cities.unshift(this.depot)
+      console.log('cities:', this.cities)
+      this.shuffleCitiesForVehicles(this.selectedVehicleNumber);
+      console.log('vehicles', this.vehicles);
+      this.searchRoutes();
+      this.isLoading = false;
+    }else{
+      alert("Wrong input!")
+    }
+
   }
 
   generateCities(clientNumber: number) {
@@ -64,28 +89,13 @@ export class SolverComponentsComponent implements OnInit {
     }
   }
 
-  getClosestCityToDepo() {
-    let closestCity!: City;
-    let closestCalc = Number.MAX_SAFE_INTEGER;
-    this.cities.forEach(city => {
-      let calc = this.getDistance(city, this.depot)
-      if (calc < closestCalc) {
-        console.log("kisebb ", calc, ' mint ami volt: ', closestCalc)
-        console.log('cityrégi: ', closestCity, 'új: ', city)
-        closestCalc = calc;
-        closestCity = city;
-      }
-    })
-    console.log('closest: ', closestCity, ' calc: ', closestCalc)
-  }
-
   shuffleCitiesForVehicles(riderNumber: number) {
     let usedCities: number[] = [];
     let tmpVehicles: { routeNumber: number, cityIndex: number }[] = [];
 
     this.cities.forEach((_city, index) => {
       let routeNumber = Math.floor(Math.random() * ((riderNumber) - 0) + 0);
-      if (!usedCities.includes(index)) {
+      if (!usedCities.includes(index) && index != 0) {
         tmpVehicles.push({ 'routeNumber': routeNumber, 'cityIndex': index })
         usedCities.push(index);
       }
@@ -95,8 +105,12 @@ export class SolverComponentsComponent implements OnInit {
       ...prevVal,
       [nextVal.routeNumber]: [...(prevVal[nextVal.routeNumber] || []), nextVal.cityIndex],
     }), {});
-
-    this.vehicles = Object.entries(tmpVehicles).map(groupedRoutes => ({ 'routeNumber': +groupedRoutes[0], 'destinations': [...[groupedRoutes[1]]][0] as unknown as number[] }));
+    this.vehicles = Object.entries(tmpVehicles)
+    .map(groupedRoutes => ({ 'routeNumber': +groupedRoutes[0], 'destinations': [...[groupedRoutes[1]]][0] as unknown as number[] }));
+    this.vehicles.forEach(vehicle => {
+      vehicle.destinations.unshift(0)
+      vehicle.destinations.push(0)
+    })
   }
 
 
@@ -125,8 +139,8 @@ export class SolverComponentsComponent implements OnInit {
 
       for (let j = 0; j < 100; j++) {
         let neighbor = [...sBase];
-        let a: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
-        let b: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
+        let a: number = Math.floor(Math.random() * ((bestRoutes.length - 2) -1)+1);
+        let b: number = Math.floor(Math.random() * ((bestRoutes.length - 2) -1)+1);
         let tmp = neighbor[a];
         neighbor[a] = neighbor[b];
         neighbor[b] = tmp;
@@ -148,106 +162,42 @@ export class SolverComponentsComponent implements OnInit {
     return bestRoutes;
   }
 
-  optimumRouteSearch(routes: number[]){
-    let bestRoutes = [...routes]
-    let bestCalc = this.objectFunction(bestRoutes)
-    let badCities:number[] = [];
-    
-    for (let i = 0; i < routes.length; i++) {
-      let currentRoutes:number[] = [];
-      currentRoutes.push(bestRoutes[i]);
-
-      for(let cityIndex = 0; cityIndex < this.cities.length; cityIndex++) {
-        if(!badCities.includes(cityIndex)){
-          currentRoutes.push(cityIndex);
-          currentRoutes = this.neighborhoodSearch(10000,currentRoutes);
-          let insideCalc = this.objectFunction(currentRoutes);
-          if(insideCalc > bestCalc){
-            console.log("nemjó: ",cityIndex)
-            badCities.push(cityIndex)
-          }
-        }
-      }
-    }
-    let allRoute:number[] = this.cities.map((_i,index)=> (index));
-    return allRoute.filter(city => !badCities.includes(city));
-  }
-
-  bestRouteSearch(iterations: number, routes: number[]) {
-    let bestCalc = this.objectFunction(routes);
+  optimumRouteSearch(routes: number[][]){
     let bestRoutes = [...routes];
 
-    let sBase = [...bestRoutes];
-    let sBaseCalc = this.objectFunction(sBase)
 
-    let tmpUsedCities: number[] = [...this.usedCities, ...bestRoutes];
-
-    let goodCities = this.optimumRouteSearch(sBase);
-
-    let allRoute:number[] = this.cities.map((_i,index)=> (index));
-    let leftOverCities:number[] = allRoute.filter(city => !this.usedCities.includes(city))
-    
-    for (let i = 0; i < iterations; i++) {
-      let bestNeighborRoutes = [...sBase];
-      let bestNeighborCalc = sBaseCalc;
-
-      for (let j = 0; j < 100; j++) {
-        let randomCityIndex = Math.floor(Math.random() * ((leftOverCities.length - 1)));
-        let routeIndex: number = Math.floor(Math.random() * ((this.cities.length - 1)));
-        let insideRoutes = [...sBase];
-        let randomCity = leftOverCities[randomCityIndex];
-        if (!tmpUsedCities.includes(randomCity) && !bestNeighborRoutes.includes(randomCity) && goodCities.includes(randomCity)) {
-          if (routeIndex < insideRoutes.length) {
-            insideRoutes[routeIndex] = randomCity;
-          }
-          else if(routeIndex >= insideRoutes.length){
-            insideRoutes.push(randomCity)
-          }
-        let currentRoutesSearchCalc = this.objectFunction(insideRoutes);
-        if (currentRoutesSearchCalc < bestNeighborCalc && !tmpUsedCities.includes(randomCity)) {
-          tmpUsedCities[tmpUsedCities.length - 1] = randomCity;
-          bestNeighborCalc = currentRoutesSearchCalc;
-          bestNeighborRoutes = [...insideRoutes];
-        }
-      }
-
-      }
-      sBase = bestNeighborRoutes;
-      sBaseCalc = bestNeighborCalc;
-      if (sBaseCalc < bestCalc) {
-        bestRoutes = [...bestNeighborRoutes];
-        bestCalc = bestNeighborCalc;
-      }
-    }
-    bestRoutes.forEach(city => !this.usedCities.includes(city) ? this.usedCities.push(city) : null)
-    return this.neighborhoodSearch(100000,bestRoutes);
+    return bestRoutes;
   }
+
 
   searchRoutes() {
     let color = ['#000', '#00bcd6', '#d300d6']
     this.vehicles.forEach((vehicle, index) => {
       console.log('előtte: ', vehicle.destinations, '\nCalc: ', this.objectFunction(vehicle.destinations))
-      // let neighbor = this.neighborhoodSearch(100000, vehicle.destinations)
-      // console.log('utána: ', neighbor, '\nCalc: ', this.objectFunction(neighbor));
+      let neighbor = this.neighborhoodSearch(200000, vehicle.destinations)
+      console.log('utána: ', neighbor, '\nCalc: ', this.objectFunction(neighbor));
       // let optimum = this.optimumRouteSearch(vehicle.destinations)
       // console.log('optimum',optimum,'\nCalc: ', this.objectFunction(optimum))
-      let bestNeighbor = this.bestRouteSearch(100000, vehicle.destinations);
-      console.log('BestRouteSearch : ', bestNeighbor, '\nCalc: ', this.objectFunction(bestNeighbor),)
+      //let bestNeighbor = this.bestRouteSearch(100000, vehicle.destinations);
+      //console.log('BestRouteSearch : ', bestNeighbor, '\nCalc: ', this.objectFunction(bestNeighbor),)
       // let bestNeighborSorted = this.neighborhoodSearch(100000, bestNeighbor);
       // let bestNeighborCalc = this.objectFunction(bestNeighborSorted);
       // console.log('BestRouteSearch : ', bestNeighbor, '\nCalc: ', this.objectFunction(bestNeighbor), '\nRendezve:', bestNeighborSorted, '\nennek calc: ', bestNeighborCalc);
+      var r = Math.floor(Math.random() * 255);
+      var g = Math.floor(Math.random() * 255);
+      var b = Math.floor(Math.random() * 255);
+      let color = "rgb(" + r + "," + g + "," + b + ")";
       this.chartData.push({
         label: `Vehicle[${index}]`,
         data: [
-          {x:this.depot.x,y:this.depot.y},...bestNeighbor.map(cityNumber => ({ x: this.cities[cityNumber].x, y: this.cities[cityNumber].y })),{x:this.depot.x,y:this.depot.y}
+          ...neighbor.map(cityNumber => ({ x: this.cities[cityNumber].x, y: this.cities[cityNumber].y }))
         ],
-        borderColor: color[index],
+        borderColor: color,
         borderWidth: 1,
-        pointBackgroundColor: color[index],
-        pointBorderColor: color[index],
-        pointRadius: 5,
-        pointHoverRadius: 5,
-        fill: false,
+        pointBackgroundColor: color,
+        pointBorderColor: color,
+        pointRadius: 3,
+        pointHoverRadius: 4,
         tension: 0,
         showLine: true
       })
@@ -259,10 +209,10 @@ export class SolverComponentsComponent implements OnInit {
       borderWidth: 1,
       pointBackgroundColor: 'red',
       pointBorderColor: 'red',
-      pointRadius: 5,
-      pointHoverRadius: 5,
-      fill: false,
-      tension: 0,
+      pointRadius: 8,
+      pointHoverRadius: 8,
+      fill: true,
+      tension: 10,
       showLine: true
     })
     console.table(this.cities)
@@ -279,6 +229,53 @@ export class SolverComponentsComponent implements OnInit {
 
 
 
+  // bestRouteSearch(iterations: number, routes: number[]) {
+  //   let bestCalc = this.objectFunction(routes);
+  //   let bestRoutes = [...routes];
+
+  //   let sBase = [...bestRoutes];
+  //   let sBaseCalc = this.objectFunction(sBase)
+
+  //   let tmpUsedCities: number[] = [...this.usedCities, ...bestRoutes];
+
+  //   let allRoute:number[] = this.cities.map((_i,index)=> (index));
+  //   let leftOverCities:number[] = allRoute.filter(city => !this.usedCities.includes(city))
+    
+  //   for (let i = 0; i < iterations; i++) {
+  //     let bestNeighborRoutes = [...sBase];
+  //     let bestNeighborCalc = sBaseCalc;
+
+  //     for (let j = 0; j < 100; j++) {
+  //       let randomCityIndex = Math.floor(Math.random() * ((leftOverCities.length - 1)));
+  //       let routeIndex: number = Math.floor(Math.random() * ((this.cities.length - 1)));
+  //       let insideRoutes = [...sBase];
+  //       let randomCity = leftOverCities[randomCityIndex];
+  //       if (!tmpUsedCities.includes(randomCity) && !bestNeighborRoutes.includes(randomCity)) {
+  //         if (routeIndex < insideRoutes.length) {
+  //           insideRoutes[routeIndex] = randomCity;
+  //         }
+  //         else if(routeIndex >= insideRoutes.length){
+  //           insideRoutes.push(randomCity)
+  //         }
+  //       let currentRoutesSearchCalc = this.objectFunction(insideRoutes);
+  //       if (currentRoutesSearchCalc < bestNeighborCalc && !tmpUsedCities.includes(randomCity)) {
+  //         tmpUsedCities[tmpUsedCities.length - 1] = randomCity;
+  //         bestNeighborCalc = currentRoutesSearchCalc;
+  //         bestNeighborRoutes = [...insideRoutes];
+  //       }
+  //     }
+
+  //     }
+  //     sBase = bestNeighborRoutes;
+  //     sBaseCalc = bestNeighborCalc;
+  //     if (sBaseCalc < bestCalc) {
+  //       bestRoutes = [...bestNeighborRoutes];
+  //       bestCalc = bestNeighborCalc;
+  //     }
+  //   }
+  //   bestRoutes.forEach(city => !this.usedCities.includes(city) ? this.usedCities.push(city) : null)
+  //   return this.neighborhoodSearch(100000,bestRoutes);
+  // }
 
 
   // bestRouteSearch(iterations: number, routes: number[]) {
