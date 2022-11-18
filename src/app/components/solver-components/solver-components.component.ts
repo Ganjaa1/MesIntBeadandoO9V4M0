@@ -42,7 +42,8 @@ export class SolverComponentsComponent implements OnInit {
   //selectboxra subscribe -> megadni a numbereket 2 db van!
 
   ngOnInit(): void {
-    this.generateCities(10);
+    //this.generateCities(10);
+    this.cities = [{x:10,y:10},{x:10,y:40},{x:30,y:80},{x:20,y:90},{x:70,y:30},{x:60,y:90},{x:50,y:40},{x:40,y:80},{x:90,y:60},{x:20,y:10}]
     console.log('cities:', this.cities)
     this.shuffleCitiesForVehicles(2);
     console.log('vehicles', this.vehicles);
@@ -116,20 +117,20 @@ export class SolverComponentsComponent implements OnInit {
     let sBase = bestRoutes
     let sBaseCalc = this.objectFunction(sBase)
     for (let i = 0; i < iterations; i++) {
-      let bestNeighborRoutes = sBase;
+      let bestNeighborRoutes = [...sBase];
       let bestNeighborCalc = sBaseCalc;
       for (let j = 0; j < 100; j++) {
-        let neigbour = [...sBase];
+        let neighbor = [...sBase];
         let a: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
         let b: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
-        let tmp = +neigbour[a];
-        neigbour[a] = neigbour[b];
-        neigbour[b] = tmp;
-        let neighbourCalc = this.objectFunction(neigbour);
+        let tmp = neighbor[a];
+        neighbor[a] = neighbor[b];
+        neighbor[b] = tmp;
+        let neighborCalc = this.objectFunction(neighbor);
 
-        if (neighbourCalc < bestNeighborCalc && a != b) {
-          bestNeighborCalc = neighbourCalc;
-          bestNeighborRoutes = neigbour;
+        if (neighborCalc < bestNeighborCalc && a != b) {
+          bestNeighborCalc = neighborCalc;
+          bestNeighborRoutes = neighbor;
         }
       }
       sBase = bestNeighborRoutes;
@@ -141,38 +142,6 @@ export class SolverComponentsComponent implements OnInit {
     }
     return bestRoutes;
   }
-  // bestRouteSearch(iterations: number, routes: number[]) {
-  //   let bestCalc = this.objectFunction(routes);
-  //   let bestRoutes = routes;
-  //   let sBase = [...bestRoutes]
-  //   let sBaseCalc = this.objectFunction(sBase)
-  //   for (let i = 0; i < iterations; i++) {
-  //     let bestNeighborRoutes = [...sBase];
-  //     let bestNeighborCalc = sBaseCalc;
-  //     for (let j = 0; j < 100; j++) {
-  //       let neigbour = [...sBase];
-  //       let a: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
-  //       let citiesIndex: number = Math.floor(Math.random() * ((this.cities.length - 1)));
-  //       let tmp = +neigbour[a];
-  //       neigbour[a] = citiesIndex;
-  //       neigbour[citiesIndex] = tmp;
-  //       this.neighborhoodSearch(1000, neigbour)
-  //       let neighbourCalc = this.objectFunction(neigbour);
-
-  //       if (neighbourCalc < bestNeighborCalc && a != citiesIndex) {
-  //         bestNeighborCalc = neighbourCalc;
-  //         bestNeighborRoutes = neigbour;
-  //       }
-  //     }
-  //     sBase = bestNeighborRoutes;
-  //     sBaseCalc = bestNeighborCalc;
-  //     if (sBaseCalc < bestCalc) {
-  //       bestRoutes = sBase;
-  //       bestCalc = sBaseCalc;
-  //     }
-  //   }
-  //   return bestRoutes;
-  // }
 
   bestRouteSearch(iterations: number, routes: number[]) {
     let bestCalc = this.objectFunction(routes);
@@ -182,7 +151,7 @@ export class SolverComponentsComponent implements OnInit {
     let tmpUsedCities: number[] = [...this.usedCities, ...bestRoutes];
 
     for (let i = 0; i < iterations; i++) {
-      let bestNeighborRoutes = sBase;
+      let bestNeighborRoutes = [...sBase];
       let bestNeighborCalc = sBaseCalc;
 
       for (let j = 0; j < 100; j++) {
@@ -192,11 +161,11 @@ export class SolverComponentsComponent implements OnInit {
         if (!this.usedCities.includes(randomCityIndex) && !bestNeighborRoutes.includes(randomCityIndex)) {
           let insideRoutes = [...sBase];
           insideRoutes[routeIndex] = randomCityIndex;
-          let currenRoutesSearchCalc = this.objectFunction(insideRoutes);
+          let currentRoutesSearchCalc = this.objectFunction(insideRoutes);
 
-          if (currenRoutesSearchCalc < bestNeighborCalc && !tmpUsedCities.includes(randomCityIndex)) {
+          if (currentRoutesSearchCalc < bestNeighborCalc && !tmpUsedCities.includes(randomCityIndex)) {
             tmpUsedCities[tmpUsedCities.length - 1] = randomCityIndex;
-            bestNeighborCalc = currenRoutesSearchCalc;
+            bestNeighborCalc = currentRoutesSearchCalc;
             bestNeighborRoutes = insideRoutes;
           }
         }
@@ -217,17 +186,17 @@ export class SolverComponentsComponent implements OnInit {
     this.vehicles.forEach((vehicle, index) => {
       console.log('előtte: ', vehicle.destinations, '\nCalc: ', this.objectFunction(vehicle.destinations))
       //console.log(index, ' ', this.objectFunction(vehicle.destinations));
-      let neig = this.neighborhoodSearch(100000, vehicle.destinations)
-      console.log('utána: ', neig, '\nCalc: ', this.objectFunction(neig));
+      let neighbor = this.neighborhoodSearch(100000, vehicle.destinations)
+      console.log('utána: ', neighbor, '\nCalc: ', this.objectFunction(neighbor));
 
-      let bestneig = this.bestRouteSearch(100000, vehicle.destinations);
-      let bestneigsorted = this.neighborhoodSearch(100000, bestneig);
-      let bestneigCalc = this.objectFunction(bestneigsorted);
-      console.log('BestRouteSearch : ', bestneig, '\nCalc: ', this.objectFunction(bestneig), '\nRendezve:', bestneigsorted, '\nennek calc: ', bestneigCalc);
+      let bestNeighbor = this.bestRouteSearch(100000, vehicle.destinations);
+      let bestNeighborSorted = this.neighborhoodSearch(100000, bestNeighbor);
+      let bestNeighborCalc = this.objectFunction(bestNeighborSorted);
+      console.log('BestRouteSearch : ', bestNeighbor, '\nCalc: ', this.objectFunction(bestNeighbor), '\nRendezve:', bestNeighborSorted, '\nennek calc: ', bestNeighborCalc);
       this.chartData.push({
         label: `Vehicle[${index}]`,
         data: [
-          ...bestneigsorted.map(cityNumber => ({ x: this.cities[cityNumber].x, y: this.cities[cityNumber].y }))
+          ...bestNeighborSorted.map(cityNumber => ({ x: this.cities[cityNumber].x, y: this.cities[cityNumber].y }))
         ],
         borderColor: color[index],
         borderWidth: 1,
@@ -269,8 +238,38 @@ export class SolverComponentsComponent implements OnInit {
 
 
 
+  // bestRouteSearch(iterations: number, routes: number[]) {
+  //   let bestCalc = this.objectFunction(routes);
+  //   let bestRoutes = routes;
+  //   let sBase = [...bestRoutes]
+  //   let sBaseCalc = this.objectFunction(sBase)
+  //   for (let i = 0; i < iterations; i++) {
+  //     let bestNeighborRoutes = [...sBase];
+  //     let bestNeighborCalc = sBaseCalc;
+  //     for (let j = 0; j < 100; j++) {
+  //       let neigbour = [...sBase];
+  //       let a: number = Math.floor(Math.random() * ((bestRoutes.length - 1)));
+  //       let citiesIndex: number = Math.floor(Math.random() * ((this.cities.length - 1)));
+  //       let tmp = +neigbour[a];
+  //       neigbour[a] = citiesIndex;
+  //       neigbour[citiesIndex] = tmp;
+  //       this.neighborhoodSearch(1000, neigbour)
+  //       let neighbourCalc = this.objectFunction(neigbour);
 
-
+  //       if (neighbourCalc < bestNeighborCalc && a != citiesIndex) {
+  //         bestNeighborCalc = neighbourCalc;
+  //         bestNeighborRoutes = neigbour;
+  //       }
+  //     }
+  //     sBase = bestNeighborRoutes;
+  //     sBaseCalc = bestNeighborCalc;
+  //     if (sBaseCalc < bestCalc) {
+  //       bestRoutes = sBase;
+  //       bestCalc = sBaseCalc;
+  //     }
+  //   }
+  //   return bestRoutes;
+  // }
 
 
   // objectFunction(s: number[]) {
