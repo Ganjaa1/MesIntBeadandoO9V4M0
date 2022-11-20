@@ -1,6 +1,7 @@
 main {
     height: 100%;
     width: 100%;
+    background-color: white;
 
     .loading-screen-wrapper {
         z-index: 100000;
@@ -18,14 +19,11 @@ main {
         transform: translate(-50%, -50%);
     }
 
-    div {
-        background-color: white;
-        padding: 2rem;
-    }
 
     .selectBoxes {
         display: flex;
         gap: 2rem;
+        padding-left: 1rem;
 
         mat-form-field {
             background: #dedede;
@@ -37,6 +35,36 @@ main {
             border-radius: 5px;
             background: #dedede;
             cursor: pointer;
+
+        }
+    }
+
+    .visionContainer {
+        padding: 1rem;
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+
+        .tableContainer {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            table {
+                border-collapse: collapse;
+                border: 1px solid black;
+                table-layout: auto;
+
+                tr {
+                    display: block;
+                    width: 100%;
+                }
+
+                td {
+                    border: 1px solid black;
+                    padding: 4px;
+                }
+            }
 
         }
     }
