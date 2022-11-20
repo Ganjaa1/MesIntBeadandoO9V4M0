@@ -23,8 +23,29 @@
         </mat-form-field>
         <button (click)="makeAction()">Apply</button>
     </div>
-    <div>
+    <div class="visionContainer" [hidden]="">
         <canvas baseChart [datasets]="chartData" [labels]="chartLabels" [options]="chartOptions" [legend]="chartLegend"
             [plugins]="chartPlugins" [type]="chartType"></canvas>
+
+        <div class="tableContainer">
+            <table>
+                <caption>Before algorithm run</caption>
+                <tr *ngFor="let vehicle of beforeVehicles">
+                    <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
+                    <td *ngFor="let destination of vehicle.destinations">{{destination}}</td>
+                    <td>Route cost:</td>
+                    <td>{{objectFunction(vehicle.destinations)}}</td>
+                </tr>
+            </table>
+            <table>
+                <caption>After algorithm run</caption>
+                <tr *ngFor="let vehicle of vehicles">
+                    <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
+                    <td *ngFor="let destination of vehicle.destinations">{{destination}}</td>
+                    <td>Route cost:</td>
+                    <td>{{objectFunction(vehicle.destinations)}}</td>
+                </tr>
+            </table>
+        </div>
     </div>
 </main>
