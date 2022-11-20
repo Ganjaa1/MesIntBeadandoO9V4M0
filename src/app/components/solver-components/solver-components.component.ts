@@ -9,7 +9,7 @@ import { Vehicle } from 'src/app/models/Vehicle';
   styleUrls: ['./solver-components.component.scss']
 })
 export class SolverComponentsComponent {
-  isLoading: boolean = false;
+  isLoaded: boolean = true;
 
   cities: City[] = [];
   vehicles: Vehicle[] = [];
@@ -48,13 +48,12 @@ export class SolverComponentsComponent {
       this.chartData = [];
       this.cities = [];
       this.vehicles = [];
-      this.isLoading = true;
       this.generateCities(this.selectedCityNumber);
       this.cities.unshift(this.depot)
       console.clear()
       this.shuffleCitiesForVehicles(this.selectedVehicleNumber);
       this.searchRoutes();
-      this.isLoading = false;
+      this.isLoaded = false;
     } else {
       alert("Wrong input!")
     }

@@ -1,9 +1,4 @@
 <main>
-    <div class="loading-screen-wrapper" *ngIf="isLoading">
-        <div class="loading-screen-icon">
-            Loading...
-        </div>
-    </div>
     <div class="selectBoxes">
         <mat-form-field>
             <span>Vehicle(s) number:</span>
@@ -23,12 +18,12 @@
         </mat-form-field>
         <button (click)="makeAction()">Apply</button>
     </div>
-    <div class="visionContainer" [hidden]="">
+    <div class="visionContainer" hidden>
         <canvas baseChart [datasets]="chartData" [labels]="chartLabels" [options]="chartOptions" [legend]="chartLegend"
             [plugins]="chartPlugins" [type]="chartType"></canvas>
 
         <div class="tableContainer">
-            <table>
+            <table [hidden]="isLoaded">
                 <caption>Before algorithm run</caption>
                 <tr *ngFor="let vehicle of beforeVehicles">
                     <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
@@ -37,7 +32,7 @@
                     <td>{{objectFunction(vehicle.destinations)}}</td>
                 </tr>
             </table>
-            <table>
+            <table [hidden]="isLoaded">
                 <caption>After algorithm run</caption>
                 <tr *ngFor="let vehicle of vehicles">
                     <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
