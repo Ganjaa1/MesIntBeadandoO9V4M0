@@ -172,7 +172,7 @@ export class SolverComponentsComponent {
       }
 
     };
-    console.log(currentUsedCities);
+    // console.log(currentUsedCities);
 
     this.vehicles.forEach((vehicle, index) => {
       var r = Math.floor(Math.random() * 255);
@@ -209,22 +209,30 @@ export class SolverComponentsComponent {
       tension: 10,
       showLine: true
     })
-    console.log('Előtte:');
+    // console.log('Előtte:');
     this.beforeVehicles = JSON.parse(localStorage['vehicles']);
-    let beforeVehicles: Vehicle[] = JSON.parse(localStorage['vehicles']);
-    beforeVehicles.forEach(vehicle => {
-      console.log(`ID: ${vehicle.routeNumber} \nRoute: ${vehicle.destinations.map((v, vIndex) => { if (vIndex != vehicle.destinations.length - 1) { return `${v} -> ` } else { return `${v}` } })}`)
-    })
-    console.log('---------------------------\nUtána:');
-    this.vehicles.forEach(vehicle => {
-      console.log(`ID: ${vehicle.routeNumber} \nRoute: ${vehicle.destinations.map((v, vIndex) => { if (vIndex != vehicle.destinations.length - 1) { return `${v} -> ` } else { return `${v}` } })}`)
-    })
+    // let beforeVehicles: Vehicle[] = JSON.parse(localStorage['vehicles']);
+    // beforeVehicles.forEach(vehicle => {
+    //   console.log(`ID: ${vehicle.routeNumber} \nRoute: ${vehicle.destinations.map((v, vIndex) => { if (vIndex != vehicle.destinations.length - 1) { return `${v} -> ` } else { return `${v}` } })}`)
+    // })
+    // console.log('---------------------------\nUtána:');
+    // this.vehicles.forEach(vehicle => {
+    //   console.log(`ID: ${vehicle.routeNumber} \nRoute: ${vehicle.destinations.map((v, vIndex) => { if (vIndex != vehicle.destinations.length - 1) { return `${v} -> ` } else { return `${v}` } })}`)
+    // })
 
-    console.table(this.cities)
+    // console.table(this.cities)
   }
 
   getDistance(city1: City, city2: City) {
     return Math.abs(city2.x - city1.x) + Math.abs(city1.y - city2.y);
+  }
+
+  returnBeforeSummary():number{
+    return this.beforeVehicles.reduce((totalSum,u)=>totalSum+this.objectFunction(u.destinations),0)
+  }
+  
+  returnAfterSummary():number{
+    return this.vehicles.reduce((totalSum,u)=>totalSum+this.objectFunction(u.destinations),0)
   }
 
 }
