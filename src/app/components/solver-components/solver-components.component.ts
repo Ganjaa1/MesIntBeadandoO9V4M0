@@ -148,10 +148,10 @@ export class SolverComponentsComponent {
     let currentUsedCities: number[] = []
     for (let index = 0; index < this.vehicles.length; index++) {
 
-      let optimalRoute = [...this.neighborhoodSearch(100000, this.vehicles[index].destinations)];
+      let optimalRoute = [...this.neighborhoodSearch(200000, this.vehicles[index].destinations)];
       let optimalRouteCalc = this.objectFunction(optimalRoute);
 
-      for (let insideIndex = 0; insideIndex < 200000; insideIndex++) {
+      for (let insideIndex = 0; insideIndex < 500000; insideIndex++) {
         let currentRoute = [...this.vehicles[index].destinations];
 
         let rowIndex: number = Math.floor(Math.random() * ((this.vehicles.length - 1)));
