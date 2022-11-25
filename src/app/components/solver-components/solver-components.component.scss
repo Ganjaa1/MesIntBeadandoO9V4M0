@@ -28,39 +28,6 @@ main {
         gap: 1rem;
         flex-direction: row;
         width: 50vw;
-
-        canvas {
-            border: 1px solid black;
-            padding: 0.5rem;
-        }
-
-        .tableContainer {
-
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-
-            table {
-                border-collapse: collapse;
-                border: 1px solid black;
-                table-layout: auto;
-
-                tr {
-                    display: block;
-                    width: 100%;
-                }
-
-                td {
-                    border: 1px solid black;
-                    padding: 4px;
-                }
-
-                .summaryRow {
-                    display: flex;
-                    justify-content: flex-end;
-                }
-            }
-
-        }
     }
+
 }

@@ -13,10 +13,14 @@ import { FormsModule} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { DataTableComponent } from './components/data-table/data-table.component';
+import { ChartComponent } from './components/chart/chart.component';
 @NgModule({
   declarations: [
     AppComponent,
-    SolverComponentsComponent
+    SolverComponentsComponent,
+    DataTableComponent,
+    ChartComponent
   ],
   imports: [
     BrowserModule,

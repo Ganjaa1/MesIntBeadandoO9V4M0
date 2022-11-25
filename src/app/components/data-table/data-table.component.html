@@ -1,0 +1,28 @@
+<div class="tableContainer">
+    <table>
+        <caption>Before algorithm run</caption>
+        <tr *ngFor="let vehicle of beforeVehicles">
+            <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
+            <td *ngFor="let destination of vehicle.destinations">{{destination}}</td>
+            <td style="background: rgb(255, 72, 72);">Route cost:</td>
+            <td>{{getRouteCost(vehicle.destinations)}}</td>
+        </tr>
+        <tr class="summaryRow">
+            <td>Summary:</td>
+            <td style="background: rgb(255, 72, 72);">{{returnBeforeSummary()}}</td>
+        </tr>
+    </table>
+    <table>
+        <caption>After algorithm run</caption>
+        <tr *ngFor="let vehicle of vehicles">
+            <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
+            <td *ngFor="let destination of vehicle.destinations">{{destination}}</td>
+            <td style="background: rgb(145, 145, 255);">Route cost:</td>
+            <td>{{getRouteCost(vehicle.destinations)}}</td>
+        </tr>
+        <tr class="summaryRow">
+            <td>Summary:</td>
+            <td style="background: rgb(145, 145, 255);">{{returnAfterSummary()}}</td>
+        </tr>
+    </table>
+</div>

@@ -16,39 +16,10 @@
                 </option>
             </select>
         </mat-form-field>
-        <button (click)="makeAction()">Apply</button>
+        <button (click)="makeActions()">Apply</button>
     </div>
-    <div class="visionContainer" hidden>
-        <canvas baseChart [datasets]="chartData" [labels]="chartLabels" [options]="chartOptions" [legend]="chartLegend"
-            [plugins]="chartPlugins" [type]="chartType"></canvas>
-
-        <div class="tableContainer">
-            <table [hidden]="isLoaded">
-                <caption>Before algorithm run</caption>
-                <tr *ngFor="let vehicle of beforeVehicles">
-                    <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
-                    <td *ngFor="let destination of vehicle.destinations">{{destination}}</td>
-                    <td style="background: rgb(255, 72, 72);">Route cost:</td>
-                    <td>{{objectFunction(vehicle.destinations)}}</td>
-                </tr>
-                <tr class="summaryRow">
-                    <td>Summary:</td>
-                    <td style="background: rgb(255, 72, 72);">{{returnBeforeSummary()}}</td>
-                </tr>
-            </table>
-            <table [hidden]="isLoaded">
-                <caption>After algorithm run</caption>
-                <tr *ngFor="let vehicle of vehicles">
-                    <td style="width: 5%;">Vehicle[{{vehicle.routeNumber}}]</td>
-                    <td *ngFor="let destination of vehicle.destinations">{{destination}}</td>
-                    <td style="background: rgb(145, 145, 255);">Route cost:</td>
-                    <td>{{objectFunction(vehicle.destinations)}}</td>
-                </tr>
-                <tr class="summaryRow">
-                    <td>Summary:</td>
-                    <td style="background: rgb(145, 145, 255);">{{returnAfterSummary()}}</td>
-                </tr>
-            </table>
-        </div>
+    <div class="visionContainer">
+        <app-chart *ngIf="isLoaded"></app-chart>
+        <app-data-table *ngIf="isLoaded"></app-data-table>
     </div>
 </main>
